@@ -1,0 +1,8 @@
+# 輸出資料夾
+outputs/
+
+# 暫存資料夾
+tmp/
+temp/
+.tmp/
+.temp/
