@@ -145,6 +145,44 @@ const server = http.createServer((req, res) => {
     await page.locator("#form-message[data-kind=success]").waitFor();
     await page.locator(".request-card").waitFor();
     assert.equal(posts, 1);
+    const filters = page.getByRole("group", { name: "依緊急程度篩選" });
+    assert.equal(
+      await filters
+        .getByRole("button", { name: "全部", exact: true })
+        .getAttribute("aria-pressed"),
+      "true",
+    );
+    const readsBeforeFilter = queryUrls.length;
+    const postsBeforeFilter = posts;
+    await filters.getByRole("button", { name: "低", exact: true }).click();
+    assert.equal(await page.locator(".request-card").count(), 0);
+    await page.getByText("已載入的清單中沒有緊急程度「低」的報修。").waitFor();
+    await filters.getByRole("button", { name: "高", exact: true }).click();
+    assert.equal(await page.locator(".request-card").count(), 1);
+    assert.equal(
+      await filters
+        .getByRole("button", { name: "高", exact: true })
+        .getAttribute("aria-pressed"),
+      "true",
+    );
+    assert.equal(await filters.locator('[aria-pressed="true"]').count(), 1);
+    assert.equal(
+      await page
+        .locator('.badge[data-urgency="高"]')
+        .evaluate((el) => getComputedStyle(el).color),
+      "rgb(185, 28, 28)",
+    );
+    await filters.getByRole("button", { name: "全部", exact: true }).click();
+    assert.equal(
+      queryUrls.length,
+      readsBeforeFilter,
+      "filtering must not read the database",
+    );
+    assert.equal(
+      posts,
+      postsBeforeFilter,
+      "filtering must not write the database",
+    );
     assert.equal(await page.locator("#reporter-name").inputValue(), "");
     assert.equal(await page.locator(".request-card img").count(), 0);
     assert.equal(await page.evaluate(() => window.injected), undefined);
@@ -177,7 +215,7 @@ const server = http.createServer((req, res) => {
       reporter_name: "示範同事",
       location: `示範地點 ${i}`,
       category: "設備",
-      urgency: "中",
+      urgency: ["高", "中", "低"][i % 3],
       status: "待處理",
       description: "示範問題\n待確認",
       created_at: new Date(Date.UTC(2026, 10, 11, 8, 0, -i)).toISOString(),
@@ -194,6 +232,41 @@ const server = http.createServer((req, res) => {
       await page.locator(".request-card").last().textContent(),
       /示範地點 19/,
     );
+    const readsBeforeMixedFilter = queryUrls.length;
+    const allTitles = await page.locator(".request-card h3").allTextContents();
+    for (const urgency of ["高", "中", "低"]) {
+      await filters.getByRole("button", { name: urgency, exact: true }).click();
+      assert.equal(
+        await page.locator(".request-card").count(),
+        rows.slice(0, 20).filter((row) => row.urgency === urgency).length,
+      );
+      assert.ok(
+        (
+          await page.locator(".request-card [data-urgency]").allTextContents()
+        ).every((text) => text === `緊急程度：${urgency}`),
+      );
+    }
+    await filters.getByRole("button", { name: "全部", exact: true }).click();
+    assert.deepEqual(
+      await page.locator(".request-card h3").allTextContents(),
+      allTitles,
+    );
+    assert.equal(queryUrls.length, readsBeforeMixedFilter);
+    await filters.getByRole("button", { name: "高", exact: true }).click();
+    await page.locator("#refresh-button").click();
+    await page.waitForFunction(
+      () =>
+        document.querySelector("#request-list").getAttribute("aria-busy") ===
+        "false",
+    );
+    assert.equal(
+      await filters
+        .getByRole("button", { name: "高", exact: true })
+        .getAttribute("aria-pressed"),
+      "true",
+    );
+    assert.equal(await page.locator(".request-card").count(), 7);
+    await filters.getByRole("button", { name: "全部", exact: true }).click();
     for (const width of [320, 390, 1280]) {
       await page.setViewportSize({ width, height: 900 });
       assert.equal(
@@ -208,6 +281,12 @@ const server = http.createServer((req, res) => {
     await page.reload();
     await page.waitForFunction(
       () => document.querySelectorAll(".request-card").length === 2,
+    );
+    assert.equal(
+      await filters
+        .getByRole("button", { name: "全部", exact: true })
+        .getAttribute("aria-pressed"),
+      "true",
     );
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.setViewportSize({ width: 390, height: 844 });
