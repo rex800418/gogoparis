@@ -46,10 +46,21 @@ const server = http.createServer((req, res) => {
     let failInsert = false;
     let posts = 0;
     const queryUrls = [];
+    const postUrls = [];
     await page.route("https://*.supabase.co/rest/v1/**", async (route) => {
       const request = route.request();
       if (request.method() === "POST") {
         posts++;
+        postUrls.push(request.url());
+        if (new URL(request.url()).pathname !== "/rest/v1/repair_requests") {
+          return route.fulfill({
+            status: 404,
+            json: {
+              code: "PGRST205",
+              message: "Could not find the table in the schema cache",
+            },
+          });
+        }
         const body = request.postDataJSON();
         assert.deepEqual(
           Object.keys(body).sort(),
@@ -121,6 +132,16 @@ const server = http.createServer((req, res) => {
     await fill();
     await page.locator("#submit-button").click();
     assert.equal(await page.locator("#submit-button").isDisabled(), true);
+    await page.waitForFunction(() =>
+      ["success", "error"].includes(
+        document.querySelector("#form-message").dataset.kind,
+      ),
+    );
+    assert.equal(
+      new URL(postUrls[0]).pathname,
+      "/rest/v1/repair_requests",
+      "insert must target the existing plural table",
+    );
     await page.locator("#form-message[data-kind=success]").waitFor();
     await page.locator(".request-card").waitFor();
     assert.equal(posts, 1);
