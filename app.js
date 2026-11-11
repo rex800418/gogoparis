@@ -127,7 +127,7 @@
     showMessage(formMessage, "正在送出報修，請稍候…");
     try {
       // 僅新增五個表單欄位；status、created_at 與 id 使用資料庫預設值。
-      const { error } = await client.from("repair_request").insert(payload);
+      const { error } = await client.from("repair_requests").insert(payload);
       if (error) throw error;
       form.reset();
       showMessage(
