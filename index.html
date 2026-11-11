@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#176b58" />
+    <title>報修登記</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"
+    ></script>
+    <script defer src="./config.js"></script>
+    <script defer src="./app.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">＋</span>報修服務台<span
+          class="demo-tag"
+          >示範系統</span
+        >
+      </div>
+    </header>
+    <main>
+      <div class="intro">
+        <p class="eyebrow">REPAIR SERVICE</p>
+        <h1>讓問題被看見，<br />讓日常更順暢。</h1>
+        <p>填寫報修資訊，留下清楚的問題紀錄。</p>
+      </div>
+      <section class="panel" aria-labelledby="form-heading">
+        <div class="section-heading">
+          <span class="step" aria-hidden="true">01</span>
+          <div>
+            <h2 id="form-heading">新增報修</h2>
+            <p>所有欄位皆為必填</p>
+          </div>
+        </div>
+        <p class="notice">
+          這是公開示範，請使用虛構姓名與地點。送出的內容會顯示於下方清單。
+        </p>
+        <form id="repair-form">
+          <fieldset id="form-fields">
+            <div class="form-grid">
+              <label for="reporter-name"
+                >報修人<input
+                  id="reporter-name"
+                  name="reporter_name"
+                  required
+                  maxlength="100"
+                  placeholder="例如：示範同事"
+                  autocomplete="off"
+              /></label>
+              <label for="location"
+                >地點或部門<input
+                  id="location"
+                  name="location"
+                  required
+                  maxlength="200"
+                  placeholder="例如：示範辦公室 3 樓"
+                  autocomplete="off"
+              /></label>
+              <label for="category"
+                >類別<select id="category" name="category" required>
+                  <option value="" disabled selected>請選擇問題類別</option>
+                  <option>設備</option>
+                  <option>網路</option>
+                  <option>環境</option>
+                  <option>其他</option>
+                </select></label
+              >
+              <fieldset class="urgency">
+                <legend>緊急程度</legend>
+                <div class="urgency-options">
+                  <label
+                    ><input
+                      type="radio"
+                      name="urgency"
+                      value="低"
+                      required
+                    /><span>低</span></label
+                  ><label
+                    ><input
+                      type="radio"
+                      name="urgency"
+                      value="中"
+                      checked
+                    /><span>中</span></label
+                  ><label
+                    ><input type="radio" name="urgency" value="高" /><span
+                      >高</span
+                    ></label
+                  >
+                </div>
+              </fieldset>
+              <label class="full-width" for="description"
+                >問題說明<textarea
+                  id="description"
+                  name="description"
+                  required
+                  maxlength="5000"
+                  rows="5"
+                  placeholder="請描述遇到的狀況、發生位置，以及需要協助的事項。"
+                ></textarea
+                ><span class="field-hint"
+                  >最多 5,000 字，請勿填寫個人或機密資訊。</span
+                ></label
+              >
+            </div>
+            <div class="form-footer">
+              <span>登記時間由系統自動記錄</span
+              ><button id="submit-button" type="submit">
+                送出報修 <span aria-hidden="true">→</span>
+              </button>
+            </div>
+          </fieldset>
+          <p
+            id="form-message"
+            class="message"
+            role="status"
+            aria-live="polite"
+            hidden
+          ></p>
+        </form>
+      </section>
+      <section class="panel records" aria-labelledby="list-heading">
+        <div class="list-heading">
+          <div class="section-heading">
+            <span class="step" aria-hidden="true">02</span>
+            <div>
+              <h2 id="list-heading">最近報修紀錄</h2>
+              <p>最近 20 筆・最新登記在最上方</p>
+            </div>
+          </div>
+          <button type="button" id="refresh-button" class="secondary">
+            重新整理
+          </button>
+        </div>
+        <p id="list-message" class="message" role="status" aria-live="polite">
+          正在載入報修紀錄…
+        </p>
+        <ol
+          id="request-list"
+          class="request-list"
+          aria-label="最近報修紀錄"
+          aria-busy="true"
+        ></ol>
+      </section>
+      <footer class="site-footer">
+        報修服務台 <span>每一筆紀錄，都是改善的開始。</span>
+      </footer>
+    </main>
+  </body>
+</html>

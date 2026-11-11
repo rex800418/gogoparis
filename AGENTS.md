@@ -25,3 +25,7 @@
 ## 安全與範圍
 
 僅使用虛構姓名與地點。透過前端開放資料存取前，必須啟用 Supabase 資料列安全（RLS），且不得提交具高權限的服務金鑰。目前示範允許未登入者新增資料及查看清單；狀態更新、身分驗證與通知方式仍未定案。未明確決定需求前，請勿新增資料更新權限。
+
+## 現行前端指令（2026-11）
+
+GitHub Pages 首頁及前端檔案位於儲存庫根目錄：`index.html`、`style.css`、`app.js`、`config.js`。執行 `python3 -m http.server 8000` 即可預覽，不需建置。開發檢查先 `npm ci`，再執行 `npm run check`、`npm test`；格式化使用 `npm run format`。測試以 Playwright 和模擬 REST 回應驗證前端，不替代正式 Supabase RLS 權限驗證。完整條件與限制請見 README。
