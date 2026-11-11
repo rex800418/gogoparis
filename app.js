@@ -101,6 +101,15 @@
   });
 
   async function loadRequests() {
+    if (!navigator.onLine) {
+      showMessage(
+        listMessage,
+        "目前離線，無法更新清單；僅保留本次開啟頁面已載入的紀錄，重新開啟不會保留。請連線後重新整理。",
+        "error",
+      );
+      list.setAttribute("aria-busy", "false");
+      return;
+    }
     refreshButton.disabled = true;
     list.setAttribute("aria-busy", "true");
     showMessage(listMessage, "正在載入報修紀錄…");
@@ -137,6 +146,14 @@
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
+    if (!navigator.onLine) {
+      showMessage(
+        formMessage,
+        "目前離線，報修尚未送出，也不會自動補送；請保留此頁面，連線後再按送出。",
+        "error",
+      );
+      return;
+    }
     if (!client || submitting || !form.reportValidity()) return;
     const values = new FormData(form);
     const payload = {
@@ -182,6 +199,13 @@
       fields.disabled = false;
       submitButton.textContent = "送出報修 →";
     }
+  });
+
+  window.addEventListener("online", () => {
+    if (client && !refreshButton.disabled) loadRequests();
+  });
+  window.addEventListener("offline", () => {
+    if (!submitting) loadRequests();
   });
 
   try {

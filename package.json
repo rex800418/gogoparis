@@ -2,9 +2,9 @@
   "name": "repair-registration",
   "private": true,
   "scripts": {
-    "check": "node --check app.js && node --check config.js && prettier --check index.html style.css app.js config.js tests/browser.cjs",
-    "format": "prettier --write index.html style.css app.js config.js tests/browser.cjs",
-    "test": "node tests/browser.cjs"
+    "check": "node --check app.js && node --check config.js && node --check pwa.js && node --check sw.js && prettier --check index.html style.css app.js config.js pwa.js sw.js manifest.webmanifest tests/*.cjs",
+    "format": "prettier --write index.html style.css app.js config.js pwa.js sw.js manifest.webmanifest tests/*.cjs",
+    "test": "node tests/browser.cjs && node tests/pwa.cjs"
   },
   "devDependencies": {
     "playwright": "1.56.1",

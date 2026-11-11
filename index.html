@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#176b58" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="報修登記" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="./icons/icon-192.png" />
     <title>報修登記</title>
     <link rel="stylesheet" href="./style.css" />
     <script
@@ -12,6 +17,7 @@
     ></script>
     <script defer src="./config.js"></script>
     <script defer src="./app.js"></script>
+    <script defer src="./pwa.js"></script>
   </head>
   <body>
     <header class="site-header">
@@ -28,6 +34,26 @@
         <h1>讓問題被看見，<br />讓日常更順暢。</h1>
         <p>填寫報修資訊，留下清楚的問題紀錄。</p>
       </div>
+      <aside class="pwa-panel" aria-label="安裝與連線狀態">
+        <p id="pwa-status" role="status" aria-live="polite">
+          報修送出與清單更新需要網路。
+        </p>
+        <div class="pwa-actions">
+          <button type="button" id="install-button" hidden>安裝報修 App</button>
+          <button type="button" id="update-button" hidden>
+            套用更新並重新載入
+          </button>
+          <details>
+            <summary>如何加入主畫面</summary>
+            <p>
+              Android
+              Chrome：使用瀏覽器選單的「安裝應用程式」或「加到主畫面」。iPhone／iPad：用
+              Safari
+              開啟，再從分享選單選「加入主畫面」。是否提供安裝選項依瀏覽器而定。
+            </p>
+          </details>
+        </div>
+      </aside>
       <section class="panel" aria-labelledby="form-heading">
         <div class="section-heading">
           <span class="step" aria-hidden="true">01</span>
