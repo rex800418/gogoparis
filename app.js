@@ -8,6 +8,11 @@
   const formMessage = document.querySelector("#form-message");
   const listMessage = document.querySelector("#list-message");
   const list = document.querySelector("#request-list");
+  const filterButtons = document.querySelectorAll("[data-filter]");
+  const filterMessage = document.querySelector("#filter-message");
+  let loadedRequests = [];
+  let activeFilter = "全部";
+  let hasLoaded = false;
   const categories = ["設備", "網路", "環境", "其他"];
   const urgencies = ["低", "中", "高"];
   let client;
@@ -69,6 +74,32 @@
     }
   }
 
+  function renderFilteredRequests() {
+    const visibleRequests =
+      activeFilter === "全部"
+        ? loadedRequests
+        : loadedRequests.filter((request) => request.urgency === activeFilter);
+    renderRequests(visibleRequests);
+    showMessage(
+      filterMessage,
+      hasLoaded && activeFilter !== "全部"
+        ? visibleRequests.length
+          ? `目前顯示緊急程度「${activeFilter}」的 ${visibleRequests.length} 筆報修（限已載入的最近 20 筆）。`
+          : `已載入的清單中沒有緊急程度「${activeFilter}」的報修。`
+        : "",
+    );
+  }
+
+  filterButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      activeFilter = button.dataset.filter;
+      filterButtons.forEach((option) => {
+        option.setAttribute("aria-pressed", String(option === button));
+      });
+      renderFilteredRequests();
+    });
+  });
+
   async function loadRequests() {
     refreshButton.disabled = true;
     list.setAttribute("aria-busy", "true");
@@ -82,13 +113,17 @@
         .order("created_at", { ascending: false })
         .limit(20);
       if (error) throw error;
-      renderRequests(data || []);
+      loadedRequests = data || [];
+      hasLoaded = true;
+      renderFilteredRequests();
       showMessage(
         listMessage,
         data?.length ? "" : "目前還沒有報修紀錄，填寫上方表單即可新增。",
       );
     } catch (error) {
-      const retained = list.children.length ? "（下方保留上次載入的紀錄）" : "";
+      const retained = loadedRequests.length
+        ? "（下方保留上次載入的紀錄）"
+        : "";
       showMessage(
         listMessage,
         `清單載入失敗${retained}：${errorDetail(error)} 請按「重新整理」重試。`,

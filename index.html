@@ -136,6 +136,47 @@
             重新整理
           </button>
         </div>
+        <div class="urgency-filters" role="group" aria-label="依緊急程度篩選">
+          <button
+            type="button"
+            data-filter="全部"
+            aria-pressed="true"
+            aria-controls="request-list"
+          >
+            全部
+          </button>
+          <button
+            type="button"
+            data-filter="高"
+            aria-pressed="false"
+            aria-controls="request-list"
+          >
+            高
+          </button>
+          <button
+            type="button"
+            data-filter="中"
+            aria-pressed="false"
+            aria-controls="request-list"
+          >
+            中
+          </button>
+          <button
+            type="button"
+            data-filter="低"
+            aria-pressed="false"
+            aria-controls="request-list"
+          >
+            低
+          </button>
+        </div>
+        <p
+          id="filter-message"
+          class="message"
+          role="status"
+          aria-live="polite"
+          hidden
+        ></p>
         <p id="list-message" class="message" role="status" aria-live="polite">
           正在載入報修紀錄…
         </p>
