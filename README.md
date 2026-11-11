@@ -2,6 +2,8 @@
 
 純 HTML/CSS/JavaScript 的手機友善報修表單與最近 20 筆清單。首頁為根目錄的 `index.html`，不需建置；以 CDN 載入 supabase-js v2。
 
+操作文件：[報修系統操作說明.docx](文件/報修系統操作說明.docx)
+
 ## 使用與部署
 
 - 本機預覽：`python3 -m http.server 8000`，開啟 `http://localhost:8000`。
