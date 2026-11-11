@@ -13,7 +13,21 @@ const sdk = execFileSync("curl", [
 ]);
 const server = http.createServer((req, res) => {
   const name = req.url === "/" ? "index.html" : req.url.slice(1);
-  if (!["index.html", "style.css", "app.js", "config.js"].includes(name)) {
+  if (
+    ![
+      "index.html",
+      "style.css",
+      "app.js",
+      "config.js",
+      "pwa.js",
+      "sw.js",
+      "manifest.webmanifest",
+      "icons/icon-192.png",
+      "icons/icon-512.png",
+      "icons/icon-maskable-512.png",
+      "icons/apple-touch-icon.png",
+    ].includes(name)
+  ) {
     res.writeHead(404).end();
     return;
   }
@@ -21,6 +35,8 @@ const server = http.createServer((req, res) => {
     ".html": "text/html",
     ".css": "text/css",
     ".js": "application/javascript",
+    ".webmanifest": "application/manifest+json",
+    ".png": "image/png",
   };
   res.setHeader("Content-Type", types[path.extname(name)]);
   res.end(fs.readFileSync(path.join(root, name)));
@@ -34,6 +50,7 @@ const server = http.createServer((req, res) => {
   });
   try {
     const page = await browser.newPage({
+      serviceWorkers: "block",
       viewport: { width: 390, height: 844 },
     });
     const errors = [];

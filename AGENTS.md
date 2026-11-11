@@ -29,3 +29,8 @@
 ## 現行前端指令（2026-11）
 
 GitHub Pages 首頁及前端檔案位於儲存庫根目錄：`index.html`、`style.css`、`app.js`、`config.js`。執行 `python3 -m http.server 8000` 即可預覽，不需建置。開發檢查先 `npm ci`，再執行 `npm run check`、`npm test`；格式化使用 `npm run format`。測試以 Playwright 和模擬 REST 回應驗證前端，不替代正式 Supabase RLS 權限驗證。完整條件與限制請見 README。
+
+
+## PWA 維護
+
+`manifest.webmanifest`、`pwa.js`、`sw.js` 與 `icons/` 提供安裝和靜態頁面離線快取。快取檔案變更時必須提高 `sw.js` 的 `VERSION`。不要快取 Supabase API 回應或自動補送離線報修。`npm test` 同時執行前端與真實 service worker 的子路徑、離線與更新測試，API 仍使用模擬回應。
