@@ -59,3 +59,12 @@ Node.js 18 以上，先執行 `npm ci`。正式網站不依賴 Node.js。
 
 ![手機版](docs/mobile.png)
 ![桌面版](docs/desktop.png)
+
+## 羅馬帝國東西分治（歷史頁面）
+
+`rome/index.html` 是獨立的歷史脈絡頁面，與報修系統無關：疆域變化地圖（9 個年份）、東西雙軌事件年表、東西對照與成因，以及 1453 年君士坦丁堡陷落動畫。
+
+- 網址：<https://rex800418.github.io/gogoparis/rome/>；本機預覽同樣以 `python3 -m http.server 8000` 開啟 `http://localhost:8000/rome/`。
+- 單一檔案，不需建置；只從 Google Fonts 載入字型。
+- 海岸線取自 Natural Earth（公有領域），地區分界為依羅馬行省大致位置推得的簡化界線，已內嵌在頁面中。
+- 不在 `sw.js` 快取範圍內，也不受 `npm run check` 的 Prettier 檢查。
