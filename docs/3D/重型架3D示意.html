@@ -1,0 +1,305 @@
+<title>重型架施工 3D 示意</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 工具型頁面，上方階段切換，中間 3D 視窗，下方為本階段構件說明與數量 */
+:root{
+  --bg:#f3f4f2; --panel:#ffffff; --fg:#1d2321; --muted:#5d6763; --line:#d6dad6;
+  --accent:#d9781f; --accent-ink:#ffffff; --scene:#e7eae6;
+  --font-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#151917; --panel:#1e2421; --fg:#e8ece9; --muted:#a2aca7; --line:#323a36;
+  --accent:#ef9440; --accent-ink:#1a1206; --scene:#202724; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#151917; --panel:#1e2421; --fg:#e8ece9; --muted:#a2aca7; --line:#323a36;
+  --accent:#ef9440; --accent-ink:#1a1206; --scene:#202724; color-scheme:dark}
+html,body{height:auto}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 32px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:16px}
+header{display:grid;gap:4px}
+h1{font-size:1.5rem;margin:0;text-wrap:balance;font-weight:700}
+.sub{color:var(--muted);margin:0;font-size:.92rem}
+.stages{display:flex;flex-wrap:wrap;gap:8px}
+.stages button{font:inherit;font-size:.95rem;border:1px solid var(--line);background:var(--panel);color:var(--fg);
+  padding:8px 14px;border-radius:8px;cursor:pointer;display:flex;gap:8px;align-items:center}
+.stages button .n{font-family:var(--font-mono);font-weight:500;width:22px;height:22px;border-radius:50%;
+  display:grid;place-items:center;border:1px solid var(--line);font-size:.8rem}
+.stages button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.stages button[aria-pressed="true"] .n{border-color:currentColor}
+.stages button:focus-visible,.tools button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.viewer{position:relative;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--scene);
+  height:min(68vh,640px);min-height:380px}
+#c{display:block;width:100%;height:100%;touch-action:none}
+.tools{position:absolute;top:10px;right:10px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.tools button{font:inherit;font-size:.82rem;background:var(--panel);color:var(--fg);border:1px solid var(--line);
+  border-radius:6px;padding:4px 10px;cursor:pointer;opacity:.94}
+.hint{position:absolute;left:10px;bottom:8px;font-size:.78rem;color:var(--muted);background:var(--panel);
+  padding:2px 8px;border-radius:6px;opacity:.9}
+.grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px}
+@media (max-width:760px){.grid{grid-template-columns:minmax(0,1fr)}}
+section.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;min-width:0}
+h2{font-size:1.05rem;margin:0 0 8px}
+.card p{margin:0 0 8px;max-width:65ch}
+.legend{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.legend li{display:grid;grid-template-columns:16px minmax(0,1fr) auto;gap:10px;align-items:center;font-size:.92rem}
+.legend li.off{opacity:.35}
+.sw{width:16px;height:16px;border-radius:3px;border:1px solid rgba(0,0,0,.2)}
+.qty{font-family:var(--font-mono);font-variant-numeric:tabular-nums;color:var(--muted);font-size:.85rem;white-space:nowrap}
+.note{font-size:.85rem;color:var(--muted)}
+.note ul{margin:4px 0 0;padding-left:1.2em}
+.elev{font-family:var(--font-mono);font-size:.82rem;color:var(--muted);display:grid;gap:2px;margin-top:10px}
+.elev b{color:var(--fg);font-weight:500}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>6+8 區重型架施工 3D 示意</h1>
+    <p class="sub">取 2×2 組實固 200×100 模組（約 18.0 × 11.4 m）作代表範圍，依施工順序分三階段顯示。拖曳旋轉、滾輪或雙指縮放。</p>
+  </header>
+
+  <div class="stages" role="group" aria-label="施工階段">
+    <button id="s1" data-stage="1" aria-pressed="true"><span class="n">1</span>重型架搭設＋鋪設型鋼</button>
+    <button id="s2" data-stage="2" aria-pressed="false"><span class="n">2</span>鐵管支撐立於 H150 上</button>
+    <button id="s3" data-stage="3" aria-pressed="false"><span class="n">3</span>釘角材＋鋪模板</button>
+  </div>
+
+  <div class="viewer">
+    <canvas id="c" aria-label="重型架 3D 模型"></canvas>
+    <div class="tools">
+      <button id="vIso">斜視</button><button id="vFront">立面</button><button id="vTop">俯視</button>
+    </div>
+    <div class="hint" id="hint">載入中…</div>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <h2 id="stTitle"></h2>
+      <p id="stText"></p>
+      <div class="elev" id="elev"></div>
+    </section>
+    <section class="card">
+      <h2>圖例與數量（本範圍）</h2>
+      <ul class="legend" id="legend"></ul>
+    </section>
+  </div>
+
+  <section class="card note">
+    <h2>假設與限制</h2>
+    <ul>
+      <li>重型架尺寸依實固 SUCOOT-001A：塔架 1500×1500、間距 1800、立柱線上 H200×100 主樑、其上 H150×75 次樑約 @1.0 m，型鋼完成面 +3.50 m。</li>
+      <li>鐵管支撐間距（0.9 × 1.0 m）、長度（約 2.7 m）、水平繫管位置，以及角材斷面、間距（次角材 @30 cm）、模板尺寸（1.82×0.91 m）均為示意假設，請依結構計算書與上層樓板高度調整。</li>
+      <li>只畫代表範圍，不代表整區 1132 座；模板右後角刻意留空，方便看見下層構件。</li>
+    </ul>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+const canvas=document.getElementById('c'), hint=document.getElementById('hint');
+if(!window.THREE){hint.textContent='3D 函式庫載入失敗，請重新整理頁面。';return;}
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---------- 尺寸（公尺） ----------
+const T=1.5, PITCH=3.3, NX=6, NZ=4;            // 2×2 組模組 → 6×4 座塔架
+const LEDGER=[0.45,1.95,2.95];                  // 橫桿高程
+const POST_TOP=3.0, UHEAD=3.15;
+const H200={b:0.10,d:0.20,tw:0.0055,tf:0.008}, H150={b:0.075,d:0.15,tw:0.005,tf:0.007};
+const Y_H200=UHEAD, Y_H150=UHEAD+H200.d, Y_STEEL=Y_H150+H150.d;   // 3.50
+const SH_DX=0.9, SH_LEN=2.70, Y_SHTOP=Y_STEEL+SH_LEN;             // 6.20
+const MAIN=0.09, SEC=0.06, PLY=0.018, SEC_SP=0.30;
+const XMAX=(NX-1)*PITCH+T, ZMAX=(NZ-1)*PITCH+T;                   // 18.0 × 11.4
+const COL={post:0xb9c2c9,ledger:0x8fa3b4,brace:0x5d7f9c,jack:0x6e747a,h200:0x9c3b26,h150:0xd88a1c,
+  shore:0x2f6fc4,tie:0x7aa4dc,main:0x9b6a3c,sec:0xc99a5f,ply:0xe9c27b,ground:0xa6aaa6};
+
+// ---------- 場景 ----------
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(40,1,0.1,400);
+const controls=new THREE.OrbitControls(camera,canvas);
+controls.enableDamping=true; controls.maxPolarAngle=Math.PI*0.495;
+const center=new THREE.Vector3(XMAX/2,2.6,ZMAX/2);
+scene.add(new THREE.HemisphereLight(0xffffff,0x8a8f88,0.75));
+const sun=new THREE.DirectionalLight(0xffffff,0.85); sun.position.set(-14,26,18); sun.target.position.copy(center);
+sun.castShadow=true; sun.shadow.mapSize.set(2048,2048);
+Object.assign(sun.shadow.camera,{left:-18,right:18,top:18,bottom:-18,near:1,far:80}); sun.shadow.bias=-0.0006;
+scene.add(sun,sun.target);
+
+const ground=new THREE.Mesh(new THREE.BoxGeometry(XMAX+8,0.2,ZMAX+8),new THREE.MeshStandardMaterial({color:COL.ground,roughness:1}));
+ground.position.set(XMAX/2,-0.1,ZMAX/2); ground.receiveShadow=true; scene.add(ground);
+const gh=new THREE.GridHelper(Math.ceil(XMAX+8),Math.ceil(XMAX+8),0x7d827e,0x8f948f);
+gh.position.set(XMAX/2,0.002,ZMAX/2); gh.material.transparent=true; gh.material.opacity=0.25; scene.add(gh);
+
+// ---------- 建構工具 ----------
+const up=new THREE.Vector3(0,1,0), m4=new THREE.Matrix4(), q=new THREE.Quaternion(), v=new THREE.Vector3(), s=new THREE.Vector3();
+function mat(c){return new THREE.MeshStandardMaterial({color:c,roughness:0.55,metalness:0.25});}
+function inst(geo,material,n){const m=new THREE.InstancedMesh(geo,material,n);m.castShadow=true;m.receiveShadow=true;return m;}
+function pipes(segs,r,color){            // segs: [[x,y,z],[x,y,z]]
+  const m=inst(new THREE.CylinderGeometry(r,r,1,10),mat(color),segs.length);
+  segs.forEach(([a,b],i)=>{const A=new THREE.Vector3(...a),B=new THREE.Vector3(...b);
+    const d=B.clone().sub(A),L=d.length(); q.setFromUnitVectors(up,d.normalize());
+    m4.compose(A.add(B).multiplyScalar(.5),q,s.set(1,L,1)); m.setMatrixAt(i,m4);});
+  return m;}
+function boxes(list,color){              // list: [cx,cy,cz,sx,sy,sz]
+  const m=inst(new THREE.BoxGeometry(1,1,1),mat(color),list.length);
+  list.forEach((b,i)=>{m4.compose(v.set(b[0],b[1],b[2]),q.identity(),s.set(b[3],b[4],b[5]));m.setMatrixAt(i,m4);});
+  return m;}
+function hGeo(p){const {b,d,tw,tf}=p,sh=new THREE.Shape(),x=b/2,y=d/2,w=tw/2;
+  sh.moveTo(-x,-y);sh.lineTo(x,-y);sh.lineTo(x,-y+tf);sh.lineTo(w,-y+tf);sh.lineTo(w,y-tf);sh.lineTo(x,y-tf);sh.lineTo(x,y);
+  sh.lineTo(-x,y);sh.lineTo(-x,y-tf);sh.lineTo(-w,y-tf);sh.lineTo(-w,-y+tf);sh.lineTo(-x,-y+tf);sh.closePath();
+  const g=new THREE.ExtrudeGeometry(sh,{depth:1,bevelEnabled:false});g.translate(0,0,-.5);return g;}
+function hbeams(p,list,color,alongX){     // list: [cx,cz,len,yBottom]
+  const m=inst(hGeo(p),mat(color),list.length);
+  list.forEach((b,i)=>{q.setFromAxisAngle(up,alongX?Math.PI/2:0);
+    m4.compose(v.set(b[0],b[3]+p.d/2,b[1]),q,s.set(1,1,b[2]));m.setMatrixAt(i,m4);});
+  return m;}
+function pieces(a,b,len,offset){const out=[];let x=a;let first=offset?Math.min(offset,b-a):len;
+  while(x<b-1e-6){const e=Math.min(x+first,b);out.push([x,e]);x=e;first=len;}return out;}
+
+const stages=[new THREE.Group(),new THREE.Group(),new THREE.Group()];
+stages.forEach(g=>scene.add(g));
+const qty={};
+
+// ---------- 階段 1：重型架＋型鋼 ----------
+(function(){
+  const posts=[],jacks=[],ledgers=[],braces=[],plates=[];
+  const towers=[];for(let i=0;i<NX;i++)for(let j=0;j<NZ;j++)towers.push([i*PITCH,j*PITCH,i,j]);
+  const corners=(x,z)=>[[x,z],[x+T,z],[x+T,z+T],[x,z+T]];
+  towers.forEach(([x,z])=>{
+    corners(x,z).forEach(([px,pz])=>{
+      posts.push([[px,0.25,pz],[px,POST_TOP,pz]]);
+      jacks.push([[px,0.01,pz],[px,0.25,pz]],[[px,POST_TOP,pz],[px,UHEAD-0.02,pz]]);
+      plates.push([px,0.005,pz,0.15,0.01,0.15],[px,UHEAD-0.015,pz,0.16,0.03,0.12]);
+    });
+    const c=corners(x,z);
+    for(let k=0;k<4;k++){const a=c[k],b=c[(k+1)%4];
+      LEDGER.forEach(y=>ledgers.push([[a[0],y,a[1]],[b[0],y,b[1]]]));
+      for(let L=0;L<2;L++){const y0=LEDGER[L],y1=LEDGER[L+1];const f=(k+L)%2;
+        const p=f?a:b,r=f?b:a;braces.push([[p[0],y0,p[1]],[r[0],y1,r[1]]]);}
+    }
+  });
+  // 模組內 1.8 m 連接橫桿（模組 = 3×2 座塔架）
+  const mod=(i,j)=>Math.floor(i/3)+'-'+Math.floor(j/2);
+  let link18=0;
+  towers.forEach(([x,z,i,j])=>{
+    if(i+1<NX&&mod(i,j)===mod(i+1,j)) [z,z+T].forEach(zz=>LEDGER.forEach(y=>{ledgers.push([[x+T,y,zz],[x+PITCH,y,zz]]);link18++;}));
+    if(j+1<NZ&&mod(i,j)===mod(i,j+1)) [x,x+T].forEach(xx=>LEDGER.forEach(y=>{ledgers.push([[xx,y,z+T],[xx,y,z+PITCH]]);link18++;}));
+  });
+  const g=stages[0];
+  g.add(pipes(posts,0.030,COL.post),pipes(jacks,0.019,COL.jack),pipes(ledgers,0.0243,COL.ledger),
+        pipes(braces,0.021,COL.brace),boxes(plates,COL.jack));
+  // H200 主樑：沿 z，置於每條立柱線
+  const h2=[];const xs=[];for(let i=0;i<NX;i++)xs.push(i*PITCH,i*PITCH+T);
+  xs.forEach((x,n)=>pieces(-0.3,ZMAX+0.3,6,n%2?3:0).forEach(([a,b])=>h2.push([x,(a+b)/2,b-a-0.02,Y_H200])));
+  // H150 次樑：沿 x，@1.0 m
+  const h1=[];const zs=[];for(let z=0.2;z<=ZMAX;z+=1.0)zs.push(+z.toFixed(2));
+  zs.forEach((z,n)=>pieces(-0.3,XMAX+0.3,6,n%2?3:0).forEach(([a,b])=>h1.push([(a+b)/2,z,b-a-0.02,Y_H150])));
+  g.add(hbeams(H200,h2,COL.h200,false),hbeams(H150,h1,COL.h150,true));
+  Object.assign(qty,{towers:towers.length,posts:towers.length*4,braces:braces.length,link18,
+    h200:h2.length,h150:h1.length,h150z:zs});
+})();
+
+// ---------- 階段 2：鐵管支撐 ----------
+const shoreXs=[];for(let x=0.45;x<XMAX;x+=SH_DX)shoreXs.push(+x.toFixed(2));
+(function(){
+  const outer=[],inner=[],plates=[],ties=[];const yb=Y_STEEL, ymid=yb+1.55, ytie=yb+1.4;
+  qty.h150z.forEach(z=>shoreXs.forEach(x=>{
+    outer.push([[x,yb+0.01,z],[x,ymid,z]]); inner.push([[x,ymid-0.1,z],[x,Y_SHTOP-0.01,z]]);
+    plates.push([x,yb+0.005,z,0.14,0.01,0.14],[x,Y_SHTOP-0.005,z,0.14,0.01,0.14]);
+  }));
+  qty.h150z.forEach(z=>ties.push([[shoreXs[0]-0.15,ytie,z],[shoreXs[shoreXs.length-1]+0.15,ytie,z]]));
+  shoreXs.forEach((x,k)=>{if(k%2===0)ties.push([[x,ytie+0.06,qty.h150z[0]-0.15],[x,ytie+0.06,qty.h150z.at(-1)+0.15]]);});
+  stages[1].add(pipes(outer,0.030,COL.shore),pipes(inner,0.024,COL.shore),boxes(plates,COL.jack),pipes(ties,0.0243,COL.tie));
+  qty.shores=outer.length; qty.ties=ties.length;
+})();
+
+// ---------- 階段 3：角材＋模板 ----------
+(function(){
+  const mains=[],secs=[],plys=[];
+  qty.h150z.forEach(z=>pieces(0,XMAX,3.6,0).forEach(([a,b])=>mains.push([(a+b)/2,Y_SHTOP+MAIN/2,z,b-a-0.02,MAIN,MAIN])));
+  const z0=qty.h150z[0]-0.2, z1=qty.h150z.at(-1)+0.2;
+  for(let x=0.15;x<XMAX;x+=SEC_SP)secs.push([+x.toFixed(2),Y_SHTOP+MAIN+SEC/2,(z0+z1)/2,SEC,SEC,z1-z0]);
+  const yp=Y_SHTOP+MAIN+SEC+PLY/2;
+  for(let x=0;x<XMAX-0.01;x+=1.82)for(let z=z0;z<z1-0.01;z+=0.91){
+    const cx=x+Math.min(1.82,XMAX-x)/2, cz=z+Math.min(0.91,z1-z)/2;
+    if(cx>XMAX*0.66&&cz<ZMAX*0.45)continue;                  // 右後角留空
+    plys.push([cx,yp,cz,Math.min(1.82,XMAX-x)-0.01,PLY,Math.min(0.91,z1-z)-0.01]);}
+  stages[2].add(boxes(mains,COL.main),boxes(secs,COL.sec),boxes(plys,COL.ply));
+  qty.mains=mains.length; qty.secs=secs.length; qty.plyArea=plys.reduce((t,p)=>t+p[3]*p[5],0); qty.plys=plys.length;
+  qty.topY=yp+PLY/2;
+})();
+
+// ---------- 文字 ----------
+const hex=c=>'#'+c.toString(16).padStart(6,'0');
+const LEG=[
+  [1,COL.post,'標準立柱 V60（含上下調整座）',qty.posts+' 支'],
+  [1,COL.ledger,'橫桿 1.5 m／模組內 1.8 m 連接',qty.link18+' 支（1.8 m）'],
+  [1,COL.brace,'斜撐 1515',qty.braces+' 支'],
+  [1,COL.h200,'H200×100×5.5×8 主樑（6 m）',qty.h200+' 段'],
+  [1,COL.h150,'H150×75×5×7 次樑 @1.0 m（6 m）',qty.h150+' 段'],
+  [2,COL.shore,'鐵管支撐 0.9 × 1.0 m',qty.shores+' 支'],
+  [2,COL.tie,'水平繫管',qty.ties+' 支'],
+  [3,COL.main,'主角材（沿 H150 方向）',qty.mains+' 支'],
+  [3,COL.sec,'次角材 @30 cm',qty.secs+' 支'],
+  [3,COL.ply,'模板 1.82×0.91 m',qty.plyArea.toFixed(0)+' m²（示意）'],
+];
+const INFO={
+ 1:['階段 1　重型架搭設＋鋪設型鋼',
+   `6 座塔架為一組（8100×4800），本範圍共 ${qty.towers} 座塔架。塔架以 1515 斜撐四面交叉，模組內以 1.8 m 橫桿連成一體。頂撐 U 型頭上沿 4.8 m 方向架 H200 主樑，每條立柱線一支；其上垂直方向鋪 H150 次樑約 @1.0 m，6 m 接頭錯開。`],
+ 2:['階段 2　鐵管支撐立於 H150 上',
+   `鐵管支撐底板直接坐在 H150 上翼板，沿 H150 每 0.9 m 一支，排距等於 H150 間距 1.0 m，本範圍共 ${qty.shores} 支。中段加設雙向水平繫管防止挫屈，支撐需落在型鋼腹板正上方，避免偏心。`],
+ 3:['階段 3　釘角材＋鋪模板',
+   `支撐頂板上沿 H150 方向放主角材，其上垂直方向釘次角材 @30 cm，最後鋪模板並釘固。模板右後角刻意留空，可看到下方角材與支撐。`]};
+function elev(n){const r=[['型鋼完成面',Y_STEEL],['H200 底（U 型頭）',Y_H200]];
+  if(n>=2)r.unshift(['鐵管支撐頂',Y_SHTOP]); if(n>=3)r.unshift(['模板面（示意）',qty.topY]);
+  return r.map(([k,y])=>`<div>${k}　<b>+${y.toFixed(2)} m</b></div>`).join('');}
+
+// ---------- 階段切換 ----------
+let cur=1; const anim=[0,0,0];
+function setStage(n){cur=n;
+  document.querySelectorAll('.stages button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.stage===n)));
+  stages.forEach((g,i)=>{const show=i<n; if(show&&!g.visible){g.visible=true;anim[i]=reduce?1:0;} if(!show)g.visible=false;});
+  document.getElementById('stTitle').textContent=INFO[n][0];
+  document.getElementById('stText').textContent=INFO[n][1];
+  document.getElementById('elev').innerHTML=elev(n);
+  document.getElementById('legend').innerHTML=LEG.map(([st,c,t,qn])=>
+    `<li class="${st>n?'off':''}"><span class="sw" style="background:${hex(c)}"></span><span>${t}</span><span class="qty">${qn}</span></li>`).join('');
+}
+stages.forEach((g,i)=>{g.visible=i===0;anim[i]=1;});
+document.querySelectorAll('.stages button').forEach(b=>b.addEventListener('click',()=>setStage(+b.dataset.stage)));
+
+// ---------- 視角 ----------
+const views={iso:[-9,13,27],front:[XMAX/2,4.5,ZMAX+22],top:[XMAX/2+0.01,34,ZMAX/2+0.01]};
+let tween=null;
+function go(k,instant){const to=new THREE.Vector3(...views[k]);
+  if(instant||reduce){camera.position.copy(to);controls.target.copy(center);controls.update();return;}
+  tween={from:camera.position.clone(),to,t0:performance.now()};}
+document.getElementById('vIso').onclick=()=>go('iso');
+document.getElementById('vFront').onclick=()=>go('front');
+document.getElementById('vTop').onclick=()=>go('top');
+
+function sceneColor(){scene.background=new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--scene').trim()||'#e7eae6');}
+sceneColor(); matchMedia('(prefers-color-scheme: dark)').addEventListener('change',sceneColor);
+new MutationObserver(sceneColor).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;
+  if(canvas.width!==Math.floor(w*renderer.getPixelRatio())||canvas.height!==Math.floor(h*renderer.getPixelRatio())){
+    renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}}
+function loop(now){requestAnimationFrame(loop);resize();
+  if(tween){const t=Math.min(1,(now-tween.t0)/700),e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+    camera.position.lerpVectors(tween.from,tween.to,e);controls.target.copy(center);if(t>=1)tween=null;}
+  stages.forEach((g,i)=>{if(anim[i]<1){anim[i]=Math.min(1,anim[i]+0.045);} g.position.y=(1-easeOut(anim[i]))*1.2;});
+  controls.update();renderer.render(scene,camera);}
+function easeOut(t){return 1-Math.pow(1-t,3);}
+go('iso',true); setStage(1); hint.textContent='拖曳旋轉 · 右鍵或雙指平移 · 滾輪縮放';
+requestAnimationFrame(loop);
+})();
+</script>
