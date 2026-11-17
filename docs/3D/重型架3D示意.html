@@ -91,7 +91,7 @@ h2{font-size:1.05rem;margin:0 0 8px}
   <section class="card note">
     <h2>假設與限制</h2>
     <ul>
-      <li>重型架構件依實固 SUCOOT-001A 立面細部建模：Φ60.5 立桿（V60150＋V61100）、圓盤 @50 cm、鑄造插座頭與插銷、上下調螺桿與調整螺帽、U 型頭；斜桿 1515 統一左上右下。小五金（圓盤孔、螺紋）以簡化外形表示。</li>
+      <li>重型架構件依實固 SUCOOT-001A 立面細部建模：Φ60.5 立桿（V60150＋V61100）、圓盤 @50 cm、鑄造插座頭與插銷、上下調螺桿與調整螺帽、U 型頭；斜桿 1515 各面外看左上右下（前後面相反、看過去呈打叉）；各桿件貼實固橘色貼紙。小五金（圓盤孔、螺紋）以簡化外形表示。</li>
       <li>重型架尺寸依實固 SUCOOT-001A：塔架 1500×1500、間距 1800、立柱線上 H200×100 主樑、其上 H150×75 次樑約 @1.0 m，型鋼完成面 +3.50 m。</li>
       <li>鐵管支撐間距（0.9 × 1.0 m）、長度（約 2.7 m）、水平繫管位置，以及角材斷面、間距（次角材 @30 cm）、模板尺寸（1.82×0.91 m）均為示意假設，請依結構計算書與上層樓板高度調整。</li>
       <li>只畫代表範圍，不代表整區 1132 座；模板右後角刻意留空，方便看見下層構件。</li>
@@ -159,6 +159,21 @@ function boxes(list,color){              // list: [cx,cy,cz,sx,sy,sz]
   const m=inst(new THREE.BoxGeometry(1,1,1),mat(color),list.length);
   list.forEach((b,i)=>{m4.compose(v.set(b[0],b[1],b[2]),q.identity(),s.set(b[3],b[4],b[5]));m.setMatrixAt(i,m4);});
   return m;}
+// 實固橘色貼紙：包覆在桿件上的短套筒，文字沿桿件方向
+const stickerMat=(function(){const c=document.createElement('canvas');c.width=128;c.height=512;const x=c.getContext('2d');
+  x.fillStyle='#f07a12';x.fillRect(0,0,128,512);x.fillStyle='#ffffff';x.fillRect(0,18,128,6);x.fillRect(0,488,128,6);
+  x.save();x.translate(64,256);x.rotate(-Math.PI/2);x.font='bold 54px "Noto Sans TC",sans-serif';x.textAlign='center';x.textBaseline='middle';
+  x.fillText('實固 SUCOOT',0,2);x.restore();
+  const t=new THREE.CanvasTexture(c);t.wrapS=THREE.RepeatWrapping;t.repeat.set(2,1);t.anisotropy=4;
+  return new THREE.MeshStandardMaterial({map:t,roughness:0.6,metalness:0});})();
+function stickers(list){                 // list: [[a],[b],r]
+  const m=inst(new THREE.CylinderGeometry(1,1,1,16,1,true),stickerMat,list.length);
+  list.forEach(([a,b,r],i)=>{const A=new THREE.Vector3(...a),B=new THREE.Vector3(...b);
+    const d=B.clone().sub(A),L=d.length();q.setFromUnitVectors(up,d.normalize());
+    m4.compose(A.add(B).multiplyScalar(.5),q,s.set(r,L,r));m.setMatrixAt(i,m4);});
+  return m;}
+function midBand(a,b,r,len){const A=new THREE.Vector3(...a),B=new THREE.Vector3(...b),M=A.clone().add(B).multiplyScalar(.5),
+  d=B.clone().sub(A).normalize().multiplyScalar(len/2);return [M.clone().sub(d).toArray(),M.clone().add(d).toArray(),r];}
 function hGeo(p){const {b,d,tw,tf}=p,sh=new THREE.Shape(),x=b/2,y=d/2,w=tw/2;
   sh.moveTo(-x,-y);sh.lineTo(x,-y);sh.lineTo(x,-y+tf);sh.lineTo(w,-y+tf);sh.lineTo(w,y-tf);sh.lineTo(x,y-tf);sh.lineTo(x,y);
   sh.lineTo(-x,y);sh.lineTo(-x,y-tf);sh.lineTo(-w,y-tf);sh.lineTo(-w,-y+tf);sh.lineTo(-x,-y+tf);sh.closePath();
@@ -179,7 +194,7 @@ const qty={};
 (function(){
   // 構件清單
   const posts=[],screws=[],sleeves=[],ledgerT=[],braceT=[],heads=[],wedges=[],plates=[],uheads=[];
-  const rosettes=[],nuts=[],lugs=[];
+  const rosettes=[],nuts=[],lugs=[],tags=[];
   const towers=[];for(let i=0;i<NX;i++)for(let j=0;j<NZ;j++)towers.push([i*PITCH,j*PITCH,i,j]);
   const corners=(x,z)=>[[x,z],[x+T,z],[x+T,z+T],[x,z+T]];
   const allPosts=[];
@@ -193,6 +208,7 @@ const qty={};
     posts.push([[px,STD_BOT,pz],[px,SPLICE,pz]],[[px,SPLICE,pz],[px,POST_TOP,pz]]);
     sleeves.push([[px,STD_BOT,pz],[px,STD_BOT+0.06,pz]],[[px,SPLICE-0.04,pz],[px,SPLICE+0.07,pz]]);
     ROSETTE.forEach(y=>rosettes.push([px,y,pz]));
+    tags.push([[px,1.45,pz],[px,1.73,pz],0.0318],[[px,2.45,pz],[px,2.73,pz],0.0318]);   // 立桿貼紙（兩支各一）
     // 上調：螺桿＋調整螺帽＋U 型頭（開口沿 H200 方向）
     screws.push([[px,POST_TOP-0.12,pz],[px,UHEAD-0.008,pz]]);
     nuts.push([px,POST_TOP+0.02,pz]); lugs.push([px,POST_TOP+0.02,pz,0.17,0.012,0.022],[px,POST_TOP+0.02,pz,0.022,0.012,0.17]);
@@ -204,20 +220,22 @@ const qty={};
     heads.push([hx+dx*0.025,y,hz+dz*0.025,dx?0.05:0.042,big?0.07:0.05,dz?0.05:0.042]);
     wedges.push([hx+dx*0.02,y+0.03,hz+dz*0.02,0.012,0.13,0.012]);}
   function ledger(a,b,y){const dx=Math.sign(b[0]-a[0]),dz=Math.sign(b[1]-a[1]),e=R0+0.04;
-    ledgerT.push([[a[0]+dx*e,y,a[1]+dz*e],[b[0]-dx*e,y,b[1]-dz*e]]);joint(a[0],y,a[1],dx,dz,1);joint(b[0],y,b[1],-dx,-dz,1);}
-  // 斜桿 1515：統一「左上右下」（從立面 +z 側、斷面 +x 側看）
-  function brace(a,b,y0,y1){
-    let hi,lo;
-    if(a[1]===b[1]){hi=a[0]<b[0]?a:b;lo=hi===a?b:a;}   // 沿 x 的面：左＝x 小
-    else{hi=a[1]>b[1]?a:b;lo=hi===a?b:a;}              // 沿 z 的面：左＝z 大
+    ledgerT.push([[a[0]+dx*e,y,a[1]+dz*e],[b[0]-dx*e,y,b[1]-dz*e]]);tags.push(midBand(ledgerT.at(-1)[0],ledgerT.at(-1)[1],0.0256,0.26));joint(a[0],y,a[1],dx,dz,1);joint(b[0],y,b[1],-dx,-dz,1);}
+  // 斜桿 1515：每一面「從架外看」都是左上右下；前後兩面方向相反，任一方向看過去每座塔架呈打叉
+  function brace(a,b,y0,y1,cx,cz){
+    const nx=(a[0]+b[0])/2-cx, nz=(a[1]+b[1])/2-cz;      // 外法線
+    const rx=nz, rz=-nx;                                 // 從外側看的「右」方向
+    const da=a[0]*rx+a[1]*rz, db=b[0]*rx+b[1]*rz;
+    const hi=da<db?a:b, lo=hi===a?b:a;                   // 左端在上、右端在下
     const dx=Math.sign(lo[0]-hi[0]),dz=Math.sign(lo[1]-hi[1]),e=R0+0.03;
     braceT.push([[hi[0]+dx*e,y1-0.02,hi[1]+dz*e],[lo[0]-dx*e,y0+0.02,lo[1]-dz*e]]);
+    tags.push(midBand(braceT.at(-1)[0],braceT.at(-1)[1],0.0226,0.26));
     joint(hi[0],y1-0.02,hi[1],dx,dz,0);joint(lo[0],y0+0.02,lo[1],-dx,-dz,0);}
-  towers.forEach(([x,z])=>{const c=corners(x,z);
+  towers.forEach(([x,z])=>{const c=corners(x,z),cx=x+T/2,cz=z+T/2;
     for(let k=0;k<4;k++){const a=c[k],b=c[(k+1)%4];
       LEDGER.forEach(y=>ledger(a,b,y));
-      brace(a,b,LEDGER[0],LEDGER[1]);     // 下段：0.35 → 1.85
-      brace(a,b,ROSETTE[2],LEDGER[2]);    // 上段：1.35 → 2.85（與下段平行）
+      brace(a,b,LEDGER[0],LEDGER[1],cx,cz);     // 下段：0.35 → 1.85
+      brace(a,b,ROSETTE[2],LEDGER[2],cx,cz);    // 上段：1.35 → 2.85（與下段平行）
     }});
   // 模組內 1.8 m 連接橫桿（模組 = 3×2 座塔架），只設上下兩層
   const mod=(i,j)=>Math.floor(i/3)+'-'+Math.floor(j/2);
@@ -231,7 +249,8 @@ const qty={};
   g.add(pipes(posts,0.03025,COL.post),pipes(sleeves,0.036,COL.post),pipes(screws,0.019,COL.jack),
         pipes(ledgerT,0.0243,COL.ledger),pipes(braceT,0.0214,COL.brace),
         discs(rosettes,R0,0.010,COL.post),discs(nuts,0.045,0.03,COL.nut,8),
-        boxes(heads,COL.head),boxes(wedges,COL.nut),boxes(lugs,COL.nut),boxes(plates,COL.jack),boxes(uheads,COL.jack));
+        boxes(heads,COL.head),boxes(wedges,COL.nut),boxes(lugs,COL.nut),boxes(plates,COL.jack),boxes(uheads,COL.jack),stickers(tags));
+  qty.tags=tags.length;
   // H200 主樑：沿 z，置於每條立柱線
   const h2=[];const xs=[];for(let i=0;i<NX;i++)xs.push(i*PITCH,i*PITCH+T);
   xs.forEach((x,n)=>pieces(-0.3,ZMAX+0.3,6,n%2?3:0).forEach(([a,b])=>h2.push([x,(a+b)/2,b-a-0.02,Y_H200])));
@@ -279,7 +298,8 @@ const LEG=[
   [1,COL.post,'立桿 V60150＋V61100（圓盤 @50 cm）',qty.posts+' 組'],
   [1,COL.nut,'上調／下調（螺桿＋調整螺帽＋U 型頭／底板）',qty.posts+' 組'],
   [1,COL.ledger,'橫桿 1.5 m（3 層）／1.8 m 連接（上下 2 層）',qty.link18+' 支（1.8 m）'],
-  [1,COL.brace,'斜桿 1515，統一左上右下',qty.braces+' 支'],
+  [1,COL.brace,'斜桿 1515，各面外看左上右下（看過去呈打叉）',qty.braces+' 支'],
+  [1,0xf07a12,'實固橘色貼紙（立桿、橫桿、斜桿）',qty.tags+' 張'],
   [1,COL.h200,'H200×100×5.5×8 主樑（6 m）',qty.h200+' 段'],
   [1,COL.h150,'H150×75×5×7 次樑 @1.0 m（6 m）',qty.h150+' 段'],
   [2,COL.shore,'鐵管支撐 0.9 × 1.0 m',qty.shores+' 支'],
@@ -290,7 +310,7 @@ const LEG=[
 ];
 const INFO={
  1:['階段 1　重型架搭設＋鋪設型鋼',
-   `6 座塔架為一組（8100×4800），本範圍共 ${qty.towers} 座塔架。立桿為 V60150 接 V61100，橫桿設於 +0.35、+1.85、+2.85 m 三層；每面兩支 1515 斜桿平行設置，統一左上右下（從立面、斷面看）。模組內塔架之間以 1.8 m 橫桿在上下兩層連接。頂撐 U 型頭上沿 4.8 m 方向架 H200 主樑，每條立柱線一支；其上垂直方向鋪 H150 次樑約 @1.0 m，6 m 接頭錯開。`],
+   `6 座塔架為一組（8100×4800），本範圍共 ${qty.towers} 座塔架。立桿為 V60150 接 V61100，橫桿設於 +0.35、+1.85、+2.85 m 三層；每面兩支 1515 斜桿平行設置，從架外看每一面都是左上右下，因此前後兩面方向相反，從任一面看過去每座塔架都呈打叉。各桿件貼有實固橘色貼紙。模組內塔架之間以 1.8 m 橫桿在上下兩層連接。頂撐 U 型頭上沿 4.8 m 方向架 H200 主樑，每條立柱線一支；其上垂直方向鋪 H150 次樑約 @1.0 m，6 m 接頭錯開。`],
  2:['階段 2　鐵管支撐立於 H150 上',
    `鐵管支撐底板直接坐在 H150 上翼板，沿 H150 每 0.9 m 一支，排距等於 H150 間距 1.0 m，本範圍共 ${qty.shores} 支。中段加設雙向水平繫管防止挫屈，支撐需落在型鋼腹板正上方，避免偏心。`],
  3:['階段 3　釘角材＋鋪模板',
