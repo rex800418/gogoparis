@@ -59,13 +59,14 @@ h2{font-size:1.05rem;margin:0 0 8px}
 <div class="wrap">
   <header>
     <h1>6+8 區重型架施工 3D 示意</h1>
-    <p class="sub">取 2×2 組實固 200×100 模組（約 18.0 × 11.4 m）作代表範圍，依施工順序分三階段顯示。拖曳旋轉、滾輪或雙指縮放。</p>
+    <p class="sub">取 2×2 組實固 200×100 模組（約 18.0 × 11.4 m）作代表範圍，依施工順序分四階段顯示。拖曳旋轉、滾輪或雙指縮放。</p>
   </header>
 
   <div class="stages" role="group" aria-label="施工階段">
     <button id="s1" data-stage="1" aria-pressed="true"><span class="n">1</span>重型架搭設＋鋪設型鋼</button>
-    <button id="s2" data-stage="2" aria-pressed="false"><span class="n">2</span>鐵管支撐立於 H150 上</button>
-    <button id="s3" data-stage="3" aria-pressed="false"><span class="n">3</span>釘角材＋鋪模板</button>
+    <button id="s2" data-stage="2" aria-pressed="false"><span class="n">2</span>墊條間鋪腳踏板</button>
+    <button id="s3" data-stage="3" aria-pressed="false"><span class="n">3</span>鐵管支撐立於 H150 上</button>
+    <button id="s4" data-stage="4" aria-pressed="false"><span class="n">4</span>釘角材＋鋪模板</button>
   </div>
 
   <div class="viewer">
@@ -93,7 +94,7 @@ h2{font-size:1.05rem;margin:0 0 8px}
     <ul>
       <li>重型架構件依實固 SUCOOT-001A 立面細部建模：Φ60.5 立桿（V60150＋V61100）、圓盤 @50 cm、鑄造插座頭與插銷、上下調螺桿與調整螺帽、U 型頭；斜桿 1515 各面外看左上右下（前後面相反、看過去呈打叉）；各桿件貼實固橘色貼紙。小五金（圓盤孔、螺紋）以簡化外形表示。</li>
       <li>重型架尺寸依實固 SUCOOT-001A：塔架 1500×1500、間距 1800、立柱線上 H200×100 主樑、其上 H150×75 次樑約 @1.0 m，型鋼完成面 +3.50 m。</li>
-      <li>鐵管支撐間距（0.9 × 1.0 m）、長度（約 2.7 m）、水平繫管位置，以及角材斷面、間距（次角材 @30 cm）、模板尺寸（1.82×0.91 m）均為示意假設，請依結構計算書與上層樓板高度調整。</li>
+      <li>腳踏板規格（鋼製 240 mm 寬、每格 3 片）、鐵管支撐間距（0.9 × 1.0 m）、長度（約 2.7 m）、水平繫管位置，以及角材斷面、間距（次角材 @30 cm）、模板尺寸（1.82×0.91 m）均為示意假設，請依結構計算書與上層樓板高度調整。</li>
       <li>只畫代表範圍，不代表整區 1132 座；模板右後角刻意留空，方便看見下層構件。</li>
     </ul>
   </section>
@@ -119,7 +120,7 @@ const SH_DX=0.9, SH_LEN=2.70, Y_SHTOP=Y_STEEL+SH_LEN;             // 6.20
 const MAIN=0.09, SEC=0.06, PLY=0.018, SEC_SP=0.30;
 const XMAX=(NX-1)*PITCH+T, ZMAX=(NZ-1)*PITCH+T;                   // 18.0 × 11.4
 const COL={post:0xc9cfd3,ledger:0xb7bec4,brace:0xaab3ba,jack:0x8d9399,nut:0x5b6167,head:0x9aa1a7,h200:0x9c3b26,h150:0xd88a1c,
-  shore:0x2f6fc4,tie:0x7aa4dc,main:0x9b6a3c,sec:0xc99a5f,ply:0xe9c27b,ground:0xa6aaa6};
+  shore:0x2f6fc4,tie:0x7aa4dc,main:0x9b6a3c,sec:0xc99a5f,ply:0xe9c27b,plank:0xbfc5c9,ground:0xa6aaa6};
 
 // ---------- 場景 ----------
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
@@ -161,11 +162,11 @@ function boxes(list,color){              // list: [cx,cy,cz,sx,sy,sz]
   return m;}
 // 實固橘色貼紙：包覆在桿件上的短套筒，文字沿桿件方向
 const stickerMat=(function(){const c=document.createElement('canvas');c.width=128;c.height=512;const x=c.getContext('2d');
-  x.fillStyle='#f07a12';x.fillRect(0,0,128,512);x.fillStyle='#ffffff';x.fillRect(0,18,128,6);x.fillRect(0,488,128,6);
+  x.fillStyle='#ff7300';x.fillRect(0,0,128,512);x.fillStyle='#ffffff';x.fillRect(0,18,128,6);x.fillRect(0,488,128,6);
   x.save();x.translate(64,256);x.rotate(-Math.PI/2);x.font='bold 54px "Noto Sans TC",sans-serif';x.textAlign='center';x.textBaseline='middle';
   x.fillText('實固 SUCOOT',0,2);x.restore();
   const t=new THREE.CanvasTexture(c);t.wrapS=THREE.RepeatWrapping;t.repeat.set(2,1);t.anisotropy=4;
-  return new THREE.MeshStandardMaterial({map:t,roughness:0.6,metalness:0});})();
+  return new THREE.MeshStandardMaterial({map:t,emissive:0xffffff,emissiveMap:t,emissiveIntensity:0.32,roughness:0.55,metalness:0});})();
 function stickers(list){                 // list: [[a],[b],r]
   const m=inst(new THREE.CylinderGeometry(1,1,1,16,1,true),stickerMat,list.length);
   list.forEach(([a,b,r],i)=>{const A=new THREE.Vector3(...a),B=new THREE.Vector3(...b);
@@ -186,7 +187,7 @@ function hbeams(p,list,color,alongX){     // list: [cx,cz,len,yBottom]
 function pieces(a,b,len,offset){const out=[];let x=a;let first=offset?Math.min(offset,b-a):len;
   while(x<b-1e-6){const e=Math.min(x+first,b);out.push([x,e]);x=e;first=len;}return out;}
 
-const stages=[new THREE.Group(),new THREE.Group(),new THREE.Group()];
+const stages=[new THREE.Group(),new THREE.Group(),new THREE.Group(),new THREE.Group()];
 stages.forEach(g=>scene.add(g));
 const qty={};
 
@@ -262,7 +263,27 @@ const qty={};
     h200:h2.length,h150:h1.length,h150z:zs});
 })();
 
-// ---------- 階段 2：鐵管支撐 ----------
+// ---------- 階段 2：上層墊條（H150）之間鋪腳踏板 ----------
+const PLK={w:0.24,t:0.045};
+(function(){
+  const c=document.createElement('canvas');c.width=512;c.height=64;const x=c.getContext('2d');
+  x.fillStyle='#c3c9cd';x.fillRect(0,0,512,64);x.fillStyle='#7d858b';
+  for(let i=0;i<32;i++)for(const y of [16,32,48]){x.beginPath();x.ellipse(8+i*16,y,5,3,0,0,Math.PI*2);x.fill();}
+  x.fillStyle='#9aa2a8';x.fillRect(0,0,512,3);x.fillRect(0,61,512,3);
+  const t=new THREE.CanvasTexture(c);t.wrapS=THREE.RepeatWrapping;t.repeat.set(3,1);t.anisotropy=4;
+  const pm=new THREE.MeshStandardMaterial({map:t,roughness:0.5,metalness:0.4});
+  const list=[];const zs=qty.h150z;
+  const xs=[];for(let i=0;i<NX;i++)xs.push(i*PITCH);xs.push(XMAX);           // 接頭落在 H200 上：0、3.3、6.6…、18.0
+  for(let k=0;k+1<zs.length;k++){const zc=(zs[k]+zs[k+1])/2;
+    [-0.29,0,0.29].forEach(o=>{for(let n=0;n+1<xs.length;n++){const a=xs[n],b=xs[n+1];
+      list.push([(a+b)/2,Y_H150+PLK.t/2,zc+o,b-a-0.01,PLK.t,PLK.w]);}});}
+  const m=inst(new THREE.BoxGeometry(1,1,1),pm,list.length);
+  list.forEach((b,i)=>{m4.compose(v.set(b[0],b[1],b[2]),q.identity(),s.set(b[3],b[4],b[5]));m.setMatrixAt(i,m4);});
+  stages[1].add(m);
+  qty.planks=list.length; qty.plankArea=list.reduce((t,p)=>t+p[3]*p[5],0); qty.plankTop=Y_H150+PLK.t;
+})();
+
+// ---------- 階段 3：鐵管支撐 ----------
 const shoreXs=[];for(let x=0.45;x<XMAX;x+=SH_DX)shoreXs.push(+x.toFixed(2));
 (function(){
   const outer=[],inner=[],plates=[],ties=[];const yb=Y_STEEL, ymid=yb+1.55, ytie=yb+1.4;
@@ -272,11 +293,11 @@ const shoreXs=[];for(let x=0.45;x<XMAX;x+=SH_DX)shoreXs.push(+x.toFixed(2));
   }));
   qty.h150z.forEach(z=>ties.push([[shoreXs[0]-0.15,ytie,z],[shoreXs[shoreXs.length-1]+0.15,ytie,z]]));
   shoreXs.forEach((x,k)=>{if(k%2===0)ties.push([[x,ytie+0.06,qty.h150z[0]-0.15],[x,ytie+0.06,qty.h150z.at(-1)+0.15]]);});
-  stages[1].add(pipes(outer,0.030,COL.shore),pipes(inner,0.024,COL.shore),boxes(plates,COL.jack),pipes(ties,0.0243,COL.tie));
+  stages[2].add(pipes(outer,0.030,COL.shore),pipes(inner,0.024,COL.shore),boxes(plates,COL.jack),pipes(ties,0.0243,COL.tie));
   qty.shores=outer.length; qty.ties=ties.length;
 })();
 
-// ---------- 階段 3：角材＋模板 ----------
+// ---------- 階段 4：角材＋模板 ----------
 (function(){
   const mains=[],secs=[],plys=[];
   qty.h150z.forEach(z=>pieces(0,XMAX,3.6,0).forEach(([a,b])=>mains.push([(a+b)/2,Y_SHTOP+MAIN/2,z,b-a-0.02,MAIN,MAIN])));
@@ -287,7 +308,7 @@ const shoreXs=[];for(let x=0.45;x<XMAX;x+=SH_DX)shoreXs.push(+x.toFixed(2));
     const cx=x+Math.min(1.82,XMAX-x)/2, cz=z+Math.min(0.91,z1-z)/2;
     if(cx>XMAX*0.66&&cz<ZMAX*0.45)continue;                  // 右後角留空
     plys.push([cx,yp,cz,Math.min(1.82,XMAX-x)-0.01,PLY,Math.min(0.91,z1-z)-0.01]);}
-  stages[2].add(boxes(mains,COL.main),boxes(secs,COL.sec),boxes(plys,COL.ply));
+  stages[3].add(boxes(mains,COL.main),boxes(secs,COL.sec),boxes(plys,COL.ply));
   qty.mains=mains.length; qty.secs=secs.length; qty.plyArea=plys.reduce((t,p)=>t+p[3]*p[5],0); qty.plys=plys.length;
   qty.topY=yp+PLY/2;
 })();
@@ -299,28 +320,31 @@ const LEG=[
   [1,COL.nut,'上調／下調（螺桿＋調整螺帽＋U 型頭／底板）',qty.posts+' 組'],
   [1,COL.ledger,'橫桿 1.5 m（3 層）／1.8 m 連接（上下 2 層）',qty.link18+' 支（1.8 m）'],
   [1,COL.brace,'斜桿 1515，各面外看左上右下（看過去呈打叉）',qty.braces+' 支'],
-  [1,0xf07a12,'實固橘色貼紙（立桿、橫桿、斜桿）',qty.tags+' 張'],
+  [1,0xff7300,'實固橘色貼紙（立桿、橫桿、斜桿）',qty.tags+' 張'],
   [1,COL.h200,'H200×100×5.5×8 主樑（6 m）',qty.h200+' 段'],
   [1,COL.h150,'H150×75×5×7 次樑 @1.0 m（6 m）',qty.h150+' 段'],
-  [2,COL.shore,'鐵管支撐 0.9 × 1.0 m',qty.shores+' 支'],
-  [2,COL.tie,'水平繫管',qty.ties+' 支'],
-  [3,COL.main,'主角材（沿 H150 方向）',qty.mains+' 支'],
-  [3,COL.sec,'次角材 @30 cm',qty.secs+' 支'],
-  [3,COL.ply,'模板 1.82×0.91 m',qty.plyArea.toFixed(0)+' m²（示意）'],
+  [2,COL.plank,'腳踏板 240 mm（鋪於 H200 上、H150 之間）',qty.planks+' 片（約 '+qty.plankArea.toFixed(0)+' m²）'],
+  [3,COL.shore,'鐵管支撐 0.9 × 1.0 m',qty.shores+' 支'],
+  [3,COL.tie,'水平繫管',qty.ties+' 支'],
+  [4,COL.main,'主角材（沿 H150 方向）',qty.mains+' 支'],
+  [4,COL.sec,'次角材 @30 cm',qty.secs+' 支'],
+  [4,COL.ply,'模板 1.82×0.91 m',qty.plyArea.toFixed(0)+' m²（示意）'],
 ];
 const INFO={
  1:['階段 1　重型架搭設＋鋪設型鋼',
    `6 座塔架為一組（8100×4800），本範圍共 ${qty.towers} 座塔架。立桿為 V60150 接 V61100，橫桿設於 +0.35、+1.85、+2.85 m 三層；每面兩支 1515 斜桿平行設置，從架外看每一面都是左上右下，因此前後兩面方向相反，從任一面看過去每座塔架都呈打叉。各桿件貼有實固橘色貼紙。模組內塔架之間以 1.8 m 橫桿在上下兩層連接。頂撐 U 型頭上沿 4.8 m 方向架 H200 主樑，每條立柱線一支；其上垂直方向鋪 H150 次樑約 @1.0 m，6 m 接頭錯開。`],
- 2:['階段 2　鐵管支撐立於 H150 上',
+ 2:['階段 2　上層墊條之間鋪設腳踏板',
+   `在 H200 上翼板、上層墊條（H150）之間鋪設 240 mm 寬鋼製腳踏板，每格並排 3 片，接頭落在 H200 上，本範圍約 ${qty.planks} 片。鋪好後作為下一步架設鐵管支撐時的工作面，踏板面約 +${(Y_H150+PLK.t).toFixed(2)} m，低於 H150 頂面，不影響支撐落點。`],
+ 3:['階段 3　鐵管支撐立於 H150 上',
    `鐵管支撐底板直接坐在 H150 上翼板，沿 H150 每 0.9 m 一支，排距等於 H150 間距 1.0 m，本範圍共 ${qty.shores} 支。中段加設雙向水平繫管防止挫屈，支撐需落在型鋼腹板正上方，避免偏心。`],
- 3:['階段 3　釘角材＋鋪模板',
+ 4:['階段 4　釘角材＋鋪模板',
    `支撐頂板上沿 H150 方向放主角材，其上垂直方向釘次角材 @30 cm，最後鋪模板並釘固。模板右後角刻意留空，可看到下方角材與支撐。`]};
 function elev(n){const r=[['型鋼完成面',Y_STEEL],['H200 底（U 型頭）',Y_H200]];
-  if(n>=2)r.unshift(['鐵管支撐頂',Y_SHTOP]); if(n>=3)r.unshift(['模板面（示意）',qty.topY]);
+  if(n>=2)r.splice(1,0,['腳踏板面',qty.plankTop]); if(n>=3)r.unshift(['鐵管支撐頂',Y_SHTOP]); if(n>=4)r.unshift(['模板面（示意）',qty.topY]);
   return r.map(([k,y])=>`<div>${k}　<b>+${y.toFixed(2)} m</b></div>`).join('');}
 
 // ---------- 階段切換 ----------
-let cur=1; const anim=[0,0,0];
+let cur=1; const anim=[0,0,0,0];
 function setStage(n){cur=n;
   document.querySelectorAll('.stages button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.stage===n)));
   stages.forEach((g,i)=>{const show=i<n; if(show&&!g.visible){g.visible=true;anim[i]=reduce?1:0;} if(!show)g.visible=false;});
